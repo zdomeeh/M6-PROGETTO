@@ -45,14 +45,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcd60f560046da94e837267c31a57581, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 898715527982696024, guid: fb6e9e730fef4864cbf9ce4109ccec33,
+  projectilePrefab: {fileID: 898715527982696024, guid: fb6e9e730fef4864cbf9ce4109ccec33,
     type: 3}
-  _firePoint: {fileID: 7888314142798149082}
-  _fireRate: 1
-  _projectileSpeed: 15
-  _player: {fileID: 0}
-  _rotationSpeed: 5
-  _detectionRadius: 15.5
+  firePoint: {fileID: 7888314142798149082}
+  fireRate: 1
+  projectileSpeed: 10
+  player: {fileID: 3656347426196955862, guid: 82c626d4d792be0468414d657735b635, type: 3}
+  rotationSpeed: 5
+  detectionRadius: 10
 --- !u!1 &5048453923835180158
 GameObject:
   m_ObjectHideFlags: 0

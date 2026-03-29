@@ -1,75 +1,54 @@
 using UnityEngine;
 
-public class TurretAim : MonoBehaviour
+public class TurretAim : TurretBase
 {
-    [SerializeField] private GameObject _projectilePrefab;  // prefab del proiettile
-    [SerializeField] private Transform _firePoint;          // punto da cui sparare
-    [SerializeField] private float _fireRate = 1f;          // colpi al secondo
-    [SerializeField] private float _projectileSpeed = 10f;  // velocità del proiettile
-
-    [SerializeField] private Transform _player;             // player da seguire
-    [SerializeField] private float _rotationSpeed = 5f;     // velocità rotazione
-    [SerializeField] private float _detectionRadius = 10f;  // raggio di attivazione
-
-    private float _nextFireTime = 0f;
+    [SerializeField] private Transform player;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] private float detectionRadius = 10f;
 
     void Update()
     {
-        if (_player == null || _firePoint == null || _projectilePrefab == null)
+        if (player == null || firePoint == null)
             return;
 
-        // Controlla se il player è nel raggio
-        bool playerInRange = Physics.CheckSphere(transform.position, _detectionRadius, LayerMask.GetMask("Player"));
+        // Controlla distanza dal player (più semplice e pulito del CheckSphere)
+        float distance = Vector3.Distance(transform.position, player.position);
 
-        if (playerInRange)
+        if (distance <= detectionRadius)
         {
+            // Ruota verso il player
             RotateTowardsPlayer();
-            TryFire();
+
+            // Calcola direzione verso il player (leggermente verso l'alto)
+            Vector3 dir = (player.position + Vector3.up - firePoint.position).normalized;
+
+            // Prova a sparare
+            TryFire(dir);
         }
     }
 
     // Ruota solo sull'asse Y verso il player
     void RotateTowardsPlayer()
     {
-        Vector3 targetDir = _player.position - transform.position;
+        Vector3 targetDir = player.position - transform.position;
         targetDir.y = 0f; // ignora altezza
 
         if (targetDir.sqrMagnitude > 0.01f)
         {
             Quaternion targetRot = Quaternion.LookRotation(targetDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
+
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRot,
+                rotationSpeed * Time.deltaTime
+            );
         }
     }
 
-    // Spara proiettile verso player
-    void TryFire()
-    {
-        if (Time.time >= _nextFireTime)
-        {
-            Fire();
-            _nextFireTime = Time.time + 1f / _fireRate;
-        }
-    }
-
-    // Istanzia un proiettile e gli assegna velocità verso il player
-    void Fire()
-    {
-        GameObject projectile = Instantiate(_projectilePrefab, _firePoint.position, _firePoint.rotation);
-        Rigidbody rb = projectile.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            Vector3 dir = (_player.position + Vector3.up * 1f - _firePoint.position).normalized;
-            rb.velocity = dir * _projectileSpeed;
-        }
-
-        // SUONO sparo
-        AudioManager.Instance?.PlayTurretShoot();
-    }
-
-    // Mostra il raggio in scena
+    // Mostra il raggio in scena (debug)
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _detectionRadius);
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }
