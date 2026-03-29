@@ -1,60 +1,85 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameOverUI : MonoBehaviour
 {
-    [SerializeField] private LevelTimer _levelTimer; // riferimento per il timer
+    [SerializeField] private LevelTimer _levelTimer;
     [SerializeField] private DoorUnlockUI _doorUnlockUI;
 
-    private bool _shown = false; // per evitare suoni multipli
+    [Header("Checkpoint")]
+    [SerializeField] private Button _reloadCheckpointButton; // pulsante UI reload checkpoint
 
-    // Mostra il pannello di Game Over
+    private bool _shown = false;
+
+    private void Start()
+    {
+        if (_reloadCheckpointButton != null)
+            _reloadCheckpointButton.onClick.AddListener(ReloadCheckpoint);
+    }
+
     public void Show()
     {
-        if (_shown) return; // no suoni multipli
+        if (_shown) return;
         _shown = true;
 
         gameObject.SetActive(true);
 
         if (_levelTimer != null)
-            _levelTimer.StopTimer(); // blocca il timer quando muori
+            _levelTimer.StopTimer();
 
         if (_doorUnlockUI != null)
-            _doorUnlockUI.HideImmediately(); // nasconde la scritta "Porta sbloccata!"
+            _doorUnlockUI.HideImmediately();
 
         AudioManager.Instance?.PlayGameOver();
 
-        // Disabilita il controllo del player
         RigidbodyCharacter player = FindObjectOfType<RigidbodyCharacter>();
         if (player != null)
             player.enabled = false;
 
-        // Sblocca e mostra il cursore per poter cliccare i pulsanti
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        Time.timeScale = 0f; // pausa il gioco
+        Time.timeScale = 0f;
     }
 
-    // Riavvia il livello corrente
+    public void Hide()
+    {
+        _shown = false;
+        gameObject.SetActive(false);
+    }
+
+    // Reload checkpoint invece di restart livello
+    private void ReloadCheckpoint()
+    {
+        Time.timeScale = 1f;
+
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm != null)
+        {
+            gm.RespawnAtCheckpoint();
+        }
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
     public void RestartLevel()
     {
         Time.timeScale = 1f;
 
-        // Nasconde e blocca il cursore per il gameplay
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    // Torna al menu principale
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
 
-        Cursor.visible = true; // visibile
-        Cursor.lockState = CursorLockMode.None; // sbloccato
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
 
         SceneManager.LoadScene("MainMenu");
     }

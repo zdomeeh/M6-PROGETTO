@@ -17,25 +17,24 @@ public class PlayerCoinCollector : MonoBehaviour
         _coins += value;
 
         if (_playerAudio != null)
-        {
-            _playerAudio.PlayCoin(); // suono raccolta moneta
-        }
+            _playerAudio.PlayCoin();
 
         OnCoinsChanged?.Invoke(_coins);
     }
 
-    // Ritorna quante monete ha raccolto il player
-    public int GetCoins() => _coins;
+    // Imposta le monete (utile per respawn)
+    public void SetCoins(int value)
+    {
+        _coins = value;
+        OnCoinsChanged?.Invoke(_coins);
+    }
 
-    // Ritorna il numero totale di monete nel livello
+    public int GetCoins() => _coins;
     public int TotalCoinsInLevel => _totalCoinsInLevel;
 
-    // Calcola la percentuale di completamento del livello basata sulle monete raccolte
     public float GetCompletionPercentage()
     {
-        if (_totalCoinsInLevel <= 0) // Evita divisione per zero
-            return 0f;
-
-        return (_coins / (float)_totalCoinsInLevel) * 100f; // Percentuale raccolta
+        if (_totalCoinsInLevel <= 0) return 0f;
+        return (_coins / (float)_totalCoinsInLevel) * 100f;
     }
 }

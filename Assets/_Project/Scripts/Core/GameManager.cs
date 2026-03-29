@@ -17,17 +17,11 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Timer
         if (_levelTimer != null)
             _levelTimer.OnTimeEnded.AddListener(HandleTimeEnded);
 
-        // Player HP
         if (_playerLife != null)
             _playerLife.OnDefeated.AddListener(HandlePlayerDefeated);
-
-        // Opzionale: puoi ascoltare il numero di monete
-        // if (_playerCollector != null)
-        //     _playerCollector.OnCoinsChanged.AddListener(HandleCoinsChanged);
     }
 
     private void OnDisable()
@@ -41,13 +35,11 @@ public class GameManager : MonoBehaviour
 
     private void HandleTimeEnded()
     {
-        // Mostra Game Over se finisce il tempo
         _gameOverUI?.Show();
     }
 
     private void HandlePlayerDefeated()
     {
-        // Mostra Game Over se HP=0
         _gameOverUI?.Show();
     }
 
@@ -58,5 +50,30 @@ public class GameManager : MonoBehaviour
         {
             _victoryUI.ShowVictory(_playerCollector, _requiredCoins);
         }
+    }
+
+    // Metodo per respawn al checkpoint
+    public void RespawnAtCheckpoint()
+    {
+        if (_player == null) return;
+
+        // Recupera posizione e monete salvate
+        Vector3 spawnPos = CheckpointManager.Instance?.GetCurrentCheckpointPosition() ?? _player.transform.position;
+        _player.transform.position = spawnPos;
+
+        int savedCoins = CheckpointManager.Instance?.GetCoinsAtCheckpoint() ?? 0;
+        _playerCollector.SetCoins(savedCoins);
+
+        // Ripristina vita piena
+        _playerLife.SetHP(_playerLife.GetMaxHP());
+
+        // Reset timer a 120 secondi
+        _levelTimer?.ResetTimer(120f);
+
+        // Riabilita il player
+        _player.enabled = true;
+
+        // Nasconde Game Over UI
+        _gameOverUI?.Hide();
     }
 }
