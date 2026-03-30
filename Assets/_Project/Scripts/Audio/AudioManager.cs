@@ -5,15 +5,19 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
 
+    [Header("Clips")]
     [SerializeField] private AudioClip _gameOverClip;
     [SerializeField] private AudioClip _victoryClip;
     [SerializeField] private AudioClip _starSparkleClip;
     [SerializeField] private AudioClip _timeCoinClip;
     [SerializeField] private AudioClip _turretShootClip;
+    [SerializeField] private AudioClip _checkpointClip;
 
+    [Header("Volumes")]
     [SerializeField, Range(0f, 1f)] private float _turretShootVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float _checkpointVolume = 1f; // volume checkpoint
 
-    [SerializeField] private AudioSource _audioSource;
+    private AudioSource _audioSource;
 
     private void Awake()
     {
@@ -23,7 +27,7 @@ public class AudioManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 
             _audioSource = gameObject.AddComponent<AudioSource>();
-            _audioSource.spatialBlend = 0f;
+            _audioSource.spatialBlend = 0f; // effetto 2D
         }
         else
         {
@@ -76,5 +80,12 @@ public class AudioManager : MonoBehaviour
     {
         if (_turretShootClip != null)
             _audioSource.PlayOneShot(_turretShootClip, _turretShootVolume);
+    }
+
+    // CHECKPOINT
+    public void PlayCheckpoint()
+    {
+        if (_checkpointClip != null)
+            _audioSource.PlayOneShot(_checkpointClip, _checkpointVolume);
     }
 }

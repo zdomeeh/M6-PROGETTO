@@ -18,6 +18,9 @@ public class Checkpoint : MonoBehaviour
 
             _activated = true;
 
+            // Suono checkpoint
+            AudioManager.Instance?.PlayCheckpoint();
+
             // Mostra UI breve
             if (_uiText != null)
             {

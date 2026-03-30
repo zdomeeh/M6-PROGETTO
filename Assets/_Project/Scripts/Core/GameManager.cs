@@ -15,6 +15,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelTimer _levelTimer;
     [SerializeField] private int _requiredCoins = 100;
 
+    private PlatformMoveOnPlayer[] _movingPlatforms;
+
+    private void Awake()
+    {
+        // Trova tutte le piattaforme mobili presenti nella scena
+        _movingPlatforms = FindObjectsOfType<PlatformMoveOnPlayer>();
+    }
+
     private void OnEnable()
     {
         if (_levelTimer != null)
@@ -43,7 +51,6 @@ public class GameManager : MonoBehaviour
         _gameOverUI?.Show();
     }
 
-    // Metodo chiamato dalla ExitDoor
     public void FinishLevel()
     {
         if (_playerCollector != null && _victoryUI != null)
@@ -52,28 +59,29 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Metodo per respawn al checkpoint
     public void RespawnAtCheckpoint()
     {
         if (_player == null) return;
 
-        // Recupera posizione e monete salvate
+        // Teletrasporto al checkpoint
         Vector3 spawnPos = CheckpointManager.Instance?.GetCurrentCheckpointPosition() ?? _player.transform.position;
         _player.transform.position = spawnPos;
+
+        // Resetta tutte le piattaforme mobili
+        foreach (var platform in _movingPlatforms)
+        {
+            platform.ResetPlatform();
+        }
 
         int savedCoins = CheckpointManager.Instance?.GetCoinsAtCheckpoint() ?? 0;
         _playerCollector.SetCoins(savedCoins);
 
-        // Ripristina vita piena
         _playerLife.SetHP(_playerLife.GetMaxHP());
 
-        // Reset timer a 120 secondi
         _levelTimer?.ResetTimer(120f);
 
-        // Riabilita il player
         _player.enabled = true;
 
-        // Nasconde Game Over UI
         _gameOverUI?.Hide();
     }
 }
