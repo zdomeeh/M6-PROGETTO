@@ -119,3 +119,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiText: {fileID: 0}
+  _fireworkPrefab: {fileID: 8662641570015442638, guid: ab275600e48be5b4282ffe9524eef852,
+    type: 3}

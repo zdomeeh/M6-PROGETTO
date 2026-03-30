@@ -5,45 +5,69 @@ using UnityEngine.SceneManagement;
 
 public class VictoryUI : MonoBehaviour
 {
+    [Header("Panels")]
     [SerializeField] private GameObject _panelVictory;
     [SerializeField] private GameObject _panelPerfectVictory;
 
+    [Header("UI Text")]
     [SerializeField] private TextMeshProUGUI _coinsText;
     [SerializeField] private TextMeshProUGUI _completionText;
 
-    [SerializeField] private GameObject _normalStar;   // stella grigia
-    [SerializeField] private GameObject _perfectStar;  // stella gialla
-    [SerializeField] private CanvasGroup _perfectStarCanvas; // canvas per fade della stella
+    [Header("Stars")]
+    [SerializeField] private GameObject _normalStar;
+    [SerializeField] private GameObject _perfectStar;
+    [SerializeField] private CanvasGroup _perfectStarCanvas;
+    [SerializeField] private float _starFadeDuration = 1f;
 
-    [SerializeField] private DoorUnlockUI _doorUnlockUI;
+    [Header("Fireworks")]
+    [SerializeField] private GameObject _fireworkPrefab; // prefab particle system
+    [SerializeField] private Transform[] _fireworkSpawnPoints; // punti diversi per 3 fireworks finale
+    [SerializeField] private float _fireworkDuration = 2f; // durata in secondi dei firework prima del pannello
 
-    [SerializeField] private float _starFadeDuration = 1f; // durata fade stella perfetta
-
-    public void ShowVictory(PlayerCoinCollector collector, int requiredCoins) // Mostra il pannello di vittoria corretto in base al numero di monete raccolte
+    public void ShowVictory(PlayerCoinCollector collector, int requiredCoins)
     {
         if (collector == null) return;
 
-        if (_doorUnlockUI != null) // nasconde il testo "Porta sbloccata!"
-            _doorUnlockUI.HideImmediately();
+        int collected = collector.GetCoins();
+        int total = collector.TotalCoinsInLevel;
 
-        int collected = collector.GetCoins(); // Monete raccolte dal player
-        int total = collector.TotalCoinsInLevel; // Monete totali nel livello
-
-        bool perfectRun = collected >= total; // Determina se la run è perfetta o normale
+        bool perfectRun = collected >= total;
         bool normalVictory = collected >= requiredCoins && collected < total;
 
         if (_coinsText != null)
             _coinsText.text = collected + " / " + total + " coins";
 
-        // RESET STAR
         if (_normalStar != null) _normalStar.SetActive(false);
         if (_perfectStar != null)
         {
             _perfectStar.SetActive(true);
-            if (_perfectStarCanvas != null) _perfectStarCanvas.alpha = 0f; // parte invisibile
+            if (_perfectStarCanvas != null)
+                _perfectStarCanvas.alpha = 0f;
         }
 
-        // PERFECT RUN
+        // Avvia coroutine che gestisce delay e pannello
+        StartCoroutine(ShowVictoryRoutine(perfectRun, normalVictory));
+    }
+
+    private IEnumerator ShowVictoryRoutine(bool perfectRun, bool normalVictory)
+    {
+        // Avvio fuochi d'artificio
+        if (_fireworkPrefab != null && _fireworkSpawnPoints != null)
+        {
+            foreach (Transform spawn in _fireworkSpawnPoints)
+            {
+                if (spawn != null)
+                {
+                    Instantiate(_fireworkPrefab, spawn.position, Quaternion.identity);
+                    AudioManager.Instance?.PlayFirework();
+                }
+            }
+        }
+
+        // Aspetta la durata dei firework prima di mostrare il pannello
+        yield return new WaitForSecondsRealtime(_fireworkDuration);
+
+        // Mostra pannelli e stelle
         if (perfectRun)
         {
             _panelVictory?.SetActive(false);
@@ -52,21 +76,16 @@ public class VictoryUI : MonoBehaviour
             if (_completionText != null)
                 _completionText.text = "110% Completato";
 
-            _normalStar?.SetActive(true); // Mostra subito la stella normale
+            _normalStar?.SetActive(true);
 
-            // Imposta alpha 0 per la stella perfetta e avvia il fade
             if (_perfectStar != null)
             {
-                _perfectStar.SetActive(true);
                 CanvasGroup cg = _perfectStar.GetComponent<CanvasGroup>();
-                if (cg == null)
-                    cg = _perfectStar.AddComponent<CanvasGroup>();
-
+                if (cg == null) cg = _perfectStar.AddComponent<CanvasGroup>();
                 cg.alpha = 0f;
                 StartCoroutine(FadeInPerfectStar(cg));
             }
         }
-        // VITTORIA NORMALE
         else if (normalVictory)
         {
             _panelVictory?.SetActive(true);
@@ -80,23 +99,20 @@ public class VictoryUI : MonoBehaviour
 
             AudioManager.Instance?.PlayVictory();
         }
-        // Caso in cui il player non ha il minimo delle monete richiesto
         else
         {
             Debug.Log("Non hai abbastanza monete per aprire la porta!");
-            return;
+            yield break;
         }
 
-        // Disabilita il controllo del player
+        // Blocca player e pausa gioco
         RigidbodyCharacter player = FindObjectOfType<RigidbodyCharacter>();
         if (player != null)
             player.enabled = false;
 
-        // Mostra e sblocca il cursore
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-
-        Time.timeScale = 0f; // pausa il gioco
+        Time.timeScale = 0f;
     }
 
     private IEnumerator FadeInPerfectStar(CanvasGroup canvasGroup)
@@ -108,19 +124,15 @@ public class VictoryUI : MonoBehaviour
             canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / _starFadeDuration);
             yield return null;
         }
-        canvasGroup.alpha = 1f; // assicura alpha finale
-
-        // Suono sparkle
+        canvasGroup.alpha = 1f;
         AudioManager.Instance?.PlayPerfectVictory();
     }
 
-    public void GoToMainMenu() // Torna al menu principale ripristinando il tempo
+    public void GoToMainMenu()
     {
         Time.timeScale = 1f;
-
-        Cursor.visible = true;           // visibile
-        Cursor.lockState = CursorLockMode.None; // sbloccato
-
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         SceneManager.LoadScene("MainMenu");
     }
 }

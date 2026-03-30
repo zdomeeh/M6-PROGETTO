@@ -12,12 +12,15 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip _timeCoinClip;
     [SerializeField] private AudioClip _turretShootClip;
     [SerializeField] private AudioClip _checkpointClip;
+    [SerializeField] private AudioClip _fireworkClip;
+
+    [Header("AudioSources")]
+    [SerializeField] private AudioSource _musicSource; // Musica di background
+    private AudioSource _sfxSource; // SFX generali
 
     [Header("Volumes")]
-    [SerializeField, Range(0f, 1f)] private float _turretShootVolume = 1f;
-    [SerializeField, Range(0f, 1f)] private float _checkpointVolume = 1f; // volume checkpoint
-
-    private AudioSource _audioSource;
+    [Range(0f, 1f)] public float MusicVolume = 1f;
+    [Range(0f, 1f)] public float SFXVolume = 1f;
 
     private void Awake()
     {
@@ -26,8 +29,17 @@ public class AudioManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            _audioSource = gameObject.AddComponent<AudioSource>();
-            _audioSource.spatialBlend = 0f; // effetto 2D
+            // AudioSource per SFX
+            _sfxSource = gameObject.AddComponent<AudioSource>();
+            _sfxSource.spatialBlend = 0f; // effetto 2D
+
+            // Controllo musica
+            if (_musicSource == null)
+            {
+                _musicSource = gameObject.AddComponent<AudioSource>();
+                _musicSource.loop = true;
+                _musicSource.spatialBlend = 0f;
+            }
         }
         else
         {
@@ -35,57 +47,68 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // GAME OVER
-    public void PlayGameOver()
+    private void Update()
     {
-        if (_gameOverClip != null)
-            _audioSource.PlayOneShot(_gameOverClip);
+        // Aggiorna volumi ogni frame per riflettere slider
+        if (_musicSource != null)
+            _musicSource.volume = MusicVolume;
+
+        if (_sfxSource != null)
+            _sfxSource.volume = SFXVolume;
     }
 
-    // NORMAL VICTORY
-    public void PlayVictory()
+    // --- Metodi pubblici per slider ---
+    public void SetMusicVolume(float value)
     {
-        if (_victoryClip != null)
-            _audioSource.PlayOneShot(_victoryClip);
+        MusicVolume = Mathf.Clamp01(value);
+        if (_musicSource != null)
+            _musicSource.volume = MusicVolume;
     }
 
-    // PERFECT VICTORY
+    public void SetSFXVolume(float value)
+    {
+        SFXVolume = Mathf.Clamp01(value);
+        if (_sfxSource != null)
+            _sfxSource.volume = SFXVolume;
+    }
+
+    // --- SFX comuni ---
+    public void PlayGameOver() { PlaySFX(_gameOverClip); }
+    public void PlayVictory() { PlaySFX(_victoryClip); }
     public void PlayPerfectVictory()
     {
         StartCoroutine(PlayPerfectVictoryRoutine());
     }
-
     private IEnumerator PlayPerfectVictoryRoutine()
     {
-        // Suono della vittoria normale
-        if (_victoryClip != null)
-            _audioSource.PlayOneShot(_victoryClip);
-
-        // Suono dello sparkle parte subito insieme al fade della stella
-        if (_starSparkleClip != null)
-            _audioSource.PlayOneShot(_starSparkleClip);
-
+        PlaySFX(_victoryClip);
+        PlaySFX(_starSparkleClip);
         yield return null;
     }
+    public void PlayTimeCoin() { PlaySFX(_timeCoinClip); }
+    public void PlayTurretShoot() { PlaySFX(_turretShootClip); }
+    public void PlayCheckpoint() { PlaySFX(_checkpointClip); }
+    public void PlayFirework() { PlaySFX(_fireworkClip); }
 
-    // TIME COIN
-    public void PlayTimeCoin()
+    // Metodo generico per riprodurre SFX
+    private void PlaySFX(AudioClip clip)
     {
-        if (_timeCoinClip != null)
-            _audioSource.PlayOneShot(_timeCoinClip);
+        if (clip != null && _sfxSource != null)
+            _sfxSource.PlayOneShot(clip, SFXVolume);
     }
 
-    // TURRET SHOOT
-    public void PlayTurretShoot()
+    // --- Musica ---
+    public void PlayMusic(AudioClip musicClip, bool loop = true)
     {
-        if (_turretShootClip != null)
-            _audioSource.PlayOneShot(_turretShootClip, _turretShootVolume);
+        if (_musicSource == null || musicClip == null) return;
+        _musicSource.clip = musicClip;
+        _musicSource.loop = loop;
+        _musicSource.Play();
     }
 
-    // CHECKPOINT
-    public void PlayCheckpoint()
+    public void StopMusic()
     {
-        if (_checkpointClip != null)
-            _audioSource.PlayOneShot(_checkpointClip, _checkpointVolume);
+        if (_musicSource != null)
+            _musicSource.Stop();
     }
 }

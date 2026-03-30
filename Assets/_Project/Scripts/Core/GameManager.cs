@@ -61,26 +61,33 @@ public class GameManager : MonoBehaviour
 
     public void RespawnAtCheckpoint()
     {
-        if (_player == null) return;
-
-        // Teletrasporto al checkpoint
-        Vector3 spawnPos = CheckpointManager.Instance?.GetCurrentCheckpointPosition() ?? _player.transform.position;
-        _player.transform.position = spawnPos;
-
-        // Resetta tutte le piattaforme mobili
-        foreach (var platform in _movingPlatforms)
+        if (CheckpointManager.Instance == null || !CheckpointManager.Instance.HasCheckpoint())
         {
-            platform.ResetPlatform();
+            Debug.Log("Non sei arrivato in nessun checkpoint");
+            return;
         }
 
-        int savedCoins = CheckpointManager.Instance?.GetCoinsAtCheckpoint() ?? 0;
-        _playerCollector.SetCoins(savedCoins);
+        Vector3 spawnPos = CheckpointManager.Instance.GetCurrentCheckpointPosition();
+        int savedCoins = CheckpointManager.Instance.GetCoinsAtCheckpoint();
 
-        _playerLife.SetHP(_playerLife.GetMaxHP());
+        if (_player != null)
+        {
+            _player.transform.position = spawnPos;
+            _player.enabled = true;
+        }
 
-        _levelTimer?.ResetTimer(120f);
+        if (_playerCollector != null)
+            _playerCollector.SetCoins(savedCoins);
 
-        _player.enabled = true;
+        if (_playerLife != null)
+            _playerLife.SetHP(_playerLife.GetMaxHP());
+
+        if (_levelTimer != null)
+            _levelTimer.ResetTimer(120f);
+
+        // Reset piattaforme mobili
+        foreach (var platform in _movingPlatforms)
+            platform.ResetPlatform();
 
         _gameOverUI?.Hide();
     }

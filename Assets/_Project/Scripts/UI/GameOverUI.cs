@@ -17,7 +17,16 @@ public class GameOverUI : MonoBehaviour
         if (_reloadCheckpointButton != null)
             _reloadCheckpointButton.onClick.AddListener(ReloadCheckpoint);
     }
-
+    private void Update()
+    {
+        if (_reloadCheckpointButton != null)
+        {
+            if (CheckpointManager.Instance != null && CheckpointManager.Instance.HasCheckpoint())
+                _reloadCheckpointButton.interactable = true;
+            else
+                _reloadCheckpointButton.interactable = false;
+        }
+    }
     public void Show()
     {
         if (_shown) return;

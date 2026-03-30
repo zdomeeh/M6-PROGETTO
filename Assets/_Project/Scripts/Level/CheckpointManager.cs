@@ -6,6 +6,7 @@ public class CheckpointManager : MonoBehaviour
 
     private Vector3 _currentCheckpointPos;
     private int _coinsAtCheckpoint;
+    private bool _hasCheckpoint = false;
 
     private void Awake()
     {
@@ -22,9 +23,12 @@ public class CheckpointManager : MonoBehaviour
     {
         _currentCheckpointPos = position;
         _coinsAtCheckpoint = coins;
+        _hasCheckpoint = true; // checkpoint attivo
         Debug.Log("Checkpoint attivato!");
     }
 
     public Vector3 GetCurrentCheckpointPosition() => _currentCheckpointPos;
     public int GetCoinsAtCheckpoint() => _coinsAtCheckpoint;
+
+    public bool HasCheckpoint() => _hasCheckpoint;
 }
