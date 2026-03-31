@@ -13,7 +13,6 @@ public class RigidbodyCharacter : MonoBehaviour
 
     [SerializeField] private Transform groundChecker;
     [SerializeField] private Transform cameraTransform;
-    [SerializeField] private PlayerAudio playerAudio;
     [SerializeField] private Animator animator;
 
     private Rigidbody rb;
@@ -169,21 +168,16 @@ public class RigidbodyCharacter : MonoBehaviour
     {
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            // Imposta la velocità verticale per saltare
             rb.velocity = new Vector3(
                 rb.velocity.x,
                 Mathf.Sqrt(jumpHeight * -2f * Physics.gravity.y),
                 rb.velocity.z
             );
 
-            // Trigger animazione salto
-            if (animator != null)
-                animator.SetTrigger("Jump");
+            if (animator != null) animator.SetTrigger("Jump");
 
-            // Riproduce audio salto se presente
-            playerAudio?.PlayJump();
+            AudioManager.Instance?.PlayPlayerJump();
 
-            // Invoca evento di salto
             OnJump?.Invoke();
         }
     }

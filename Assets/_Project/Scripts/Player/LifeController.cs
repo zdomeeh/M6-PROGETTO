@@ -10,8 +10,6 @@ public class LifeController : MonoBehaviour
     [SerializeField] private UnityEvent<int, int> _onHPChanged;
     [SerializeField] private UnityEvent _onDefeated;
 
-    [SerializeField] private PlayerAudio _playerAudio;
-
     // Eventi pubblici per GameManager
     public UnityEvent<int, int> OnHPChanged => _onHPChanged;
     public UnityEvent OnDefeated => _onDefeated;
@@ -33,9 +31,9 @@ public class LifeController : MonoBehaviour
 
         SetHP(_currentHP + amount);
 
-        if (amount < 0 && _playerAudio != null && _currentHP > 0)
+        if (amount < 0 && _currentHP > 0)
         {
-            _playerAudio.PlayDamage();
+            AudioManager.Instance?.PlayPlayerDamage();
         }
     }
 

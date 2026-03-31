@@ -51,6 +51,9 @@ public class VictoryUI : MonoBehaviour
 
     private IEnumerator ShowVictoryRoutine(bool perfectRun, bool normalVictory)
     {
+        // STOP MUSIC quando appare il pannello
+        AudioManager.Instance?.StopMusic();
+
         // Avvio fuochi d'artificio
         if (_fireworkPrefab != null && _fireworkSpawnPoints != null)
         {
@@ -133,6 +136,6 @@ public class VictoryUI : MonoBehaviour
         Time.timeScale = 1f;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-        SceneManager.LoadScene("MainMenu");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 }

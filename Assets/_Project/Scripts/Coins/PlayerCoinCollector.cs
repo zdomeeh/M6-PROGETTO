@@ -4,7 +4,6 @@ using UnityEngine.Events;
 public class PlayerCoinCollector : MonoBehaviour
 {
     [SerializeField] private int _totalCoinsInLevel = 110;
-    [SerializeField] private PlayerAudio _playerAudio;
 
     private int _coins = 0;
 
@@ -16,8 +15,7 @@ public class PlayerCoinCollector : MonoBehaviour
     {
         _coins += value;
 
-        if (_playerAudio != null)
-            _playerAudio.PlayCoin();
+            AudioManager.Instance?.PlayPlayerCoin();
 
         OnCoinsChanged?.Invoke(_coins);
     }

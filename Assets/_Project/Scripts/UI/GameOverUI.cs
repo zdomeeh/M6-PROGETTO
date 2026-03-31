@@ -8,7 +8,7 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private DoorUnlockUI _doorUnlockUI;
 
     [Header("Checkpoint")]
-    [SerializeField] private Button _reloadCheckpointButton; // pulsante UI reload checkpoint
+    [SerializeField] private Button _reloadCheckpointButton;
 
     private bool _shown = false;
 
@@ -17,16 +17,13 @@ public class GameOverUI : MonoBehaviour
         if (_reloadCheckpointButton != null)
             _reloadCheckpointButton.onClick.AddListener(ReloadCheckpoint);
     }
+
     private void Update()
     {
         if (_reloadCheckpointButton != null)
-        {
-            if (CheckpointManager.Instance != null && CheckpointManager.Instance.HasCheckpoint())
-                _reloadCheckpointButton.interactable = true;
-            else
-                _reloadCheckpointButton.interactable = false;
-        }
+            _reloadCheckpointButton.interactable = CheckpointManager.Instance?.HasCheckpoint() ?? false;
     }
+
     public void Show()
     {
         if (_shown) return;
@@ -34,13 +31,11 @@ public class GameOverUI : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        if (_levelTimer != null)
-            _levelTimer.StopTimer();
-
-        if (_doorUnlockUI != null)
-            _doorUnlockUI.HideImmediately();
+        _levelTimer?.StopTimer();
+        _doorUnlockUI?.HideImmediately();
 
         AudioManager.Instance?.PlayGameOver();
+        AudioManager.Instance?.StopMusic();
 
         RigidbodyCharacter player = FindObjectOfType<RigidbodyCharacter>();
         if (player != null)
@@ -58,19 +53,17 @@ public class GameOverUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // Reload checkpoint invece di restart livello
     private void ReloadCheckpoint()
     {
         Time.timeScale = 1f;
 
         GameManager gm = FindObjectOfType<GameManager>();
-        if (gm != null)
-        {
-            gm.RespawnAtCheckpoint();
-        }
+        gm?.RespawnAtCheckpoint();
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+
+        AudioManager.Instance?.RestartMusicForScene();
     }
 
     public void RestartLevel()
@@ -80,7 +73,13 @@ public class GameOverUI : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
+        // Resetta checkpoint prima di ricaricare il livello
+        CheckpointManager.Instance?.ResetCheckpoint();
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        // Riavvia la musica dopo il reload
+        AudioManager.Instance?.RestartMusicForScene();
     }
 
     public void GoToMainMenu()

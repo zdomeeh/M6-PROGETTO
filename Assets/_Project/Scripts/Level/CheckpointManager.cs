@@ -23,12 +23,18 @@ public class CheckpointManager : MonoBehaviour
     {
         _currentCheckpointPos = position;
         _coinsAtCheckpoint = coins;
-        _hasCheckpoint = true; // checkpoint attivo
+        _hasCheckpoint = true;
         Debug.Log("Checkpoint attivato!");
     }
 
     public Vector3 GetCurrentCheckpointPosition() => _currentCheckpointPos;
     public int GetCoinsAtCheckpoint() => _coinsAtCheckpoint;
-
     public bool HasCheckpoint() => _hasCheckpoint;
+
+    public void ResetCheckpoint()
+    {
+        _currentCheckpointPos = Vector3.zero;
+        _coinsAtCheckpoint = 0;
+        _hasCheckpoint = false;
+    }
 }
