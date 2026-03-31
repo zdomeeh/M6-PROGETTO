@@ -32,10 +32,11 @@ public class AudioManager : MonoBehaviour
 
     private void Awake()
     {
+        // Se non esiste ancora un AudioManager, rendilo singleton
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // non distruggerlo tra le scene
 
             _sfxSource = gameObject.AddComponent<AudioSource>();
             _sfxSource.spatialBlend = 0f;
@@ -49,29 +50,29 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // se esiste gia', distruggi questo duplicato
             return;
         }
     }
 
     private void Start()
     {
-        PlaySceneMusic();
+        PlaySceneMusic(); // riproduce la musica della scena
     }
 
     private void OnEnable()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded; // ascolta cambio scena
     }
 
     private void OnDisable()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded -= OnSceneLoaded; // rimuove listener
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        PlaySceneMusic();
+        PlaySceneMusic(); // cambia musica se la scena cambia
     }
 
     private void PlaySceneMusic()
@@ -81,6 +82,7 @@ public class AudioManager : MonoBehaviour
         AudioClip clipToPlay = null;
         string sceneName = SceneManager.GetActiveScene().name;
 
+        // sceglie la musica in base alla scena
         if (sceneName == "MainMenu") clipToPlay = _mainMenuMusic;
         else clipToPlay = _levelMusic;
 
@@ -94,21 +96,21 @@ public class AudioManager : MonoBehaviour
 
     public void StopMusic()
     {
-        _musicSource?.Stop();
+        _musicSource?.Stop(); // ferma la musica
     }
 
     public void RestartMusicForScene()
     {
-        PlaySceneMusic();
+        PlaySceneMusic(); // riavvia la musica della scena
     }
 
     private void Update()
     {
-        if (_musicSource != null) _musicSource.volume = MusicVolume;
-        if (_sfxSource != null) _sfxSource.volume = SFXVolume;
+        if (_musicSource != null) _musicSource.volume = MusicVolume; // aggiorna volume musica
+        if (_sfxSource != null) _sfxSource.volume = SFXVolume; // aggiorna volume SFX
     }
 
-    // --- Setter per slider PauseManager ---
+    // --- Metodi per slider ---
     public void SetMusicVolume(float value)
     {
         MusicVolume = Mathf.Clamp01(value);
@@ -131,6 +133,7 @@ public class AudioManager : MonoBehaviour
     // --- SFX generici ---
     public void PlayGameOver() => PlaySFX(_gameOverClip);
     public void PlayVictory() => PlaySFX(_victoryClip);
+
     public void PlayPerfectVictory() => StartCoroutine(PlayPerfectVictoryRoutine());
     private IEnumerator PlayPerfectVictoryRoutine()
     {
@@ -138,6 +141,7 @@ public class AudioManager : MonoBehaviour
         PlaySFX(_starSparkleClip);
         yield return null;
     }
+
     public void PlayTimeCoin() => PlaySFX(_timeCoinClip);
     public void PlayTurretShoot() => PlaySFX(_turretShootClip);
     public void PlayCheckpoint() => PlaySFX(_checkpointClip);
@@ -146,6 +150,6 @@ public class AudioManager : MonoBehaviour
     private void PlaySFX(AudioClip clip)
     {
         if (clip != null && _sfxSource != null)
-            _sfxSource.PlayOneShot(clip, SFXVolume);
+            _sfxSource.PlayOneShot(clip, SFXVolume); // riproduci effetto sonoro
     }
 }

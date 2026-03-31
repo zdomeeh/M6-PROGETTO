@@ -4,11 +4,11 @@ using System.Collections;
 
 public class DoorUnlockUI : MonoBehaviour
 {
-    [SerializeField] private PlayerCoinCollector _player; // riferimento al player
-    [SerializeField] private int _requiredCoins = 100;    // minimo per aprire
-    [SerializeField] private TextMeshProUGUI _unlockText; // testo "Porta sbloccata!"
-    [SerializeField] private AudioSource _unlockSound;    // suono
-    [SerializeField] private float _displayTime = 2f;     // tempo in secondi prima di scomparire
+    [SerializeField] private PlayerCoinCollector _player;
+    [SerializeField] private int _requiredCoins = 100;    
+    [SerializeField] private TextMeshProUGUI _unlockText; 
+    [SerializeField] private AudioSource _unlockSound;   
+    [SerializeField] private float _displayTime = 2f;     
 
     private bool _triggered = false;
 
@@ -34,7 +34,7 @@ public class DoorUnlockUI : MonoBehaviour
             }
 
             if (_unlockSound != null)
-                _unlockSound.Play(); // suona il suono
+                _unlockSound.Play(); // suono portaa aperta
         }
     }
 

@@ -26,46 +26,35 @@ public class RigidbodyCharacter : MonoBehaviour
 
     void Awake()
     {
-        // Inizializzazione del Rigidbody
+        // Inizializza Rigidbody e blocca rotazioni indesiderate
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        // Disabilita root motion per l'Animator
+        // Disabilita root motion per animator
         if (animator != null)
             animator.applyRootMotion = false;
 
-        // Controlli di sicurezza sui riferimenti
+        // Controllo riferimenti importanti
         Debug.Assert(groundChecker != null, "GroundChecker non assegnato!");
         Debug.Assert(cameraTransform != null, "CameraTransform non assegnato!");
     }
 
     void Update()
     {
-        // Controllo se il personaggio è a terra
-        HandleGroundCheck();
-
-        // Lettura input e movimento relativo alla camera
-        HandleMovementInput();
-
-        // Rotazione del personaggio verso la direzione di movimento
-        HandleRotation();
-
-        // Aggiornamento parametri dell'Animator
-        HandleAnimation();
-
-        // Gestione salto
-        HandleJump();
+        HandleGroundCheck();     // verifica se il personaggio e' a terra
+        HandleMovementInput();   // legge input e calcola direzione movimento
+        HandleRotation();        // ruota verso direzione movimento
+        HandleAnimation();       // aggiorna animazioni
+        HandleJump();            // gestisce salto
     }
 
     void FixedUpdate()
     {
-        // Applica la velocità calcolata al Rigidbody
-        ApplyMovement();
+        ApplyMovement();         // applica la velocità al Rigidbody
     }
 
     // -------------------- GROUND --------------------
-
     void HandleGroundCheck()
     {
         bool wasGrounded = isGrounded;
@@ -77,7 +66,7 @@ public class RigidbodyCharacter : MonoBehaviour
             QueryTriggerInteraction.Ignore
         );
 
-        // Se lo stato cambia, invia l'evento
+        // Se lo stato cambia, invia evento
         if (wasGrounded != isGrounded)
             OnIsGrounded?.Invoke(isGrounded);
 
@@ -86,84 +75,51 @@ public class RigidbodyCharacter : MonoBehaviour
     }
 
     // -------------------- INPUT --------------------
-
     void HandleMovementInput()
     {
-        // Lettura input della tastiera (input continuo, non più discreto)
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        // Calcolo direzione rispetto alla camera (vera, non pivot del player)
+        // Calcola direzione movimento relativa alla camera
         Vector3 camForward = cameraTransform.forward;
         Vector3 camRight = cameraTransform.right;
+        camForward.y = 0; camRight.y = 0;
+        camForward.Normalize(); camRight.Normalize();
 
-        camForward.y = 0;
-        camRight.y = 0;
-
-        camForward.Normalize();
-        camRight.Normalize();
-
-        // Movimento relativo alla camera
         Vector3 rawInput = camForward * v + camRight * h;
         rawInput = rawInput.normalized;
 
-        // Smoothing dell'input
-        // Se eravamo fermi e c'è input, forziamo subito l'input per uscire da Idle
+        // Smoothing input per movimenti fluidi
         if (smoothedMoveInput.magnitude < 0.01f && rawInput.magnitude > 0.01f)
-        {
-            smoothedMoveInput = rawInput;
-        }
+            smoothedMoveInput = rawInput; // forza input se eravamo fermi
         else
-        {
-            smoothedMoveInput = Vector3.SmoothDamp(
-                smoothedMoveInput,
-                rawInput,
-                ref moveVelocity,
-                inputSmoothTime
-            );
-        }
+            smoothedMoveInput = Vector3.SmoothDamp(smoothedMoveInput, rawInput, ref moveVelocity, inputSmoothTime);
 
-        // Imposta a zero input molto piccoli per evitare problemi
         if (smoothedMoveInput.magnitude < 0.01f)
             smoothedMoveInput = Vector3.zero;
 
-        // Aggiorna evento con velocità orizzontale
         OnUpdateHorizontalSpeed?.Invoke(smoothedMoveInput.magnitude);
     }
 
     // -------------------- ROTATION --------------------
-
     void HandleRotation()
     {
-        // Ruota il personaggio verso la direzione di movimento
-        if (smoothedMoveInput.sqrMagnitude < 0.001f)
-            return;
+        if (smoothedMoveInput.sqrMagnitude < 0.001f) return;
 
         Quaternion targetRotation = Quaternion.LookRotation(smoothedMoveInput);
-
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            rotationSpeed * Time.deltaTime
-        );
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 
     // -------------------- MOVEMENT --------------------
-
     void ApplyMovement()
     {
-        // Applica la velocità al Rigidbody mantenendo la componente verticale
         Vector3 velocity = smoothedMoveInput * moveSpeed;
-        velocity.y = rb.velocity.y;
-
+        velocity.y = rb.velocity.y; // mantieni velocità verticale (gravità / salto)
         rb.velocity = velocity;
-
-        // Blocca rotazioni indesiderate generate dalla fisica
-        rb.angularVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero; // blocca rotazioni indesiderate
     }
 
     // -------------------- JUMP --------------------
-
     void HandleJump()
     {
         if (Input.GetButtonDown("Jump") && isGrounded)
@@ -175,33 +131,25 @@ public class RigidbodyCharacter : MonoBehaviour
             );
 
             if (animator != null) animator.SetTrigger("Jump");
-
             AudioManager.Instance?.PlayPlayerJump();
-
             OnJump?.Invoke();
         }
     }
 
     // -------------------- ANIMATION --------------------
-
     void HandleAnimation()
     {
         if (animator == null) return;
-
-        // Uso della velocità per gestire le animazioni (al posto di MoveX / MoveZ)
         float speed = smoothedMoveInput.magnitude;
-
         animator.SetFloat("Speed", speed, 0.1f, Time.deltaTime);
     }
 
     // -------------------- DEBUG --------------------
-
     private void OnDrawGizmos()
     {
-        // Disegna una sfera per visualizzare il ground checker
         if (groundChecker == null) return;
 
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(groundChecker.position, groundDistance);
+        Gizmos.DrawWireSphere(groundChecker.position, groundDistance); // mostra ground checker
     }
 }

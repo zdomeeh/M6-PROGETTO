@@ -80,7 +80,7 @@ GameObject:
   - component: {fileID: 6621937667981919646}
   - component: {fileID: 5050456455073063548}
   - component: {fileID: 6587739940620410836}
-  - component: {fileID: 7613416905110188957}
+  - component: {fileID: 6861375330540151944}
   m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
@@ -441,7 +441,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 5.104459, y: 0.5954311, z: 6.160553}
   m_Center: {x: -2.5522294, y: 0.29771554, z: 3.0802917}
---- !u!114 &7613416905110188957
+--- !u!114 &6861375330540151944
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -450,12 +450,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6775157627154015987}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da4739fa0d6b8a24ea73b0c565e6eaeb, type: 3}
+  m_Script: {fileID: 11500000, guid: 3dd922383fc25e041b893108854b271d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pointA: {fileID: 5711020285476801502}
-  _pointB: {fileID: 6782140611990412050}
+  _waypoints: []
   _speed: 2
+  _loop: 1
+  _startOnPlayer: 1
 --- !u!1 &9010665646029580791
 GameObject:
   m_ObjectHideFlags: 0

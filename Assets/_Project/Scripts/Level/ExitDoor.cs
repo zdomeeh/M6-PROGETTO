@@ -6,9 +6,9 @@ public class ExitDoor : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && _gameManager != null)
+        if (other.CompareTag("Player") && _gameManager != null) // Se chi entra ha il tag "Player" e il GameManager esiste
         {
-            _gameManager.FinishLevel();
+            _gameManager.FinishLevel(); // termina il livello
         }
     }
 }

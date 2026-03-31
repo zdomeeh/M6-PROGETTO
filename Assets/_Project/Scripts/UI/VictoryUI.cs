@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class VictoryUI : MonoBehaviour
 {
@@ -20,9 +19,11 @@ public class VictoryUI : MonoBehaviour
     [SerializeField] private float _starFadeDuration = 1f;
 
     [Header("Fireworks")]
-    [SerializeField] private GameObject _fireworkPrefab; // prefab particle system
-    [SerializeField] private Transform[] _fireworkSpawnPoints; // punti diversi per 3 fireworks finale
-    [SerializeField] private float _fireworkDuration = 2f; // durata in secondi dei firework prima del pannello
+    [SerializeField] private GameObject _fireworkPrefab;
+    [SerializeField] private Transform[] _fireworkSpawnPoints;
+    [SerializeField] private float _fireworkDuration = 2f;
+
+    private bool _victoryShown = false;
 
     public void ShowVictory(PlayerCoinCollector collector, int requiredCoins)
     {
@@ -34,10 +35,24 @@ public class VictoryUI : MonoBehaviour
         bool perfectRun = collected >= total;
         bool normalVictory = collected >= requiredCoins && collected < total;
 
+        // Se il giocatore non ha raggiunto la soglia minima, esce subito senza settare _victoryShown
+        if (!perfectRun && !normalVictory)
+        {
+            Debug.Log("Non hai abbastanza monete per aprire la porta!");
+            return;
+        }
+
+        if (_victoryShown) return;
+        _victoryShown = true;
+
+        // Aggiorna testo monete
         if (_coinsText != null)
             _coinsText.text = collected + " / " + total + " coins";
 
+        // Disattiva normal star di default
         if (_normalStar != null) _normalStar.SetActive(false);
+
+        // Prepara perfect star
         if (_perfectStar != null)
         {
             _perfectStar.SetActive(true);
@@ -45,16 +60,16 @@ public class VictoryUI : MonoBehaviour
                 _perfectStarCanvas.alpha = 0f;
         }
 
-        // Avvia coroutine che gestisce delay e pannello
+        // Avvia routine
         StartCoroutine(ShowVictoryRoutine(perfectRun, normalVictory));
     }
 
     private IEnumerator ShowVictoryRoutine(bool perfectRun, bool normalVictory)
     {
-        // STOP MUSIC quando appare il pannello
+        // ferma la musica
         AudioManager.Instance?.StopMusic();
 
-        // Avvio fuochi d'artificio
+        // Avvia fuochi d'artificio solo se c'e' vittoria valida
         if (_fireworkPrefab != null && _fireworkSpawnPoints != null)
         {
             foreach (Transform spawn in _fireworkSpawnPoints)
@@ -67,11 +82,11 @@ public class VictoryUI : MonoBehaviour
             }
         }
 
-        // Aspetta la durata dei firework prima di mostrare il pannello
+        // Aspetta durata fuochi
         yield return new WaitForSecondsRealtime(_fireworkDuration);
 
         // Mostra pannelli e stelle
-        if (perfectRun)
+        if (perfectRun) // perfect victory con 132 monete
         {
             _panelVictory?.SetActive(false);
             _panelPerfectVictory?.SetActive(true);
@@ -89,7 +104,7 @@ public class VictoryUI : MonoBehaviour
                 StartCoroutine(FadeInPerfectStar(cg));
             }
         }
-        else if (normalVictory)
+        else if (normalVictory) // normal victory con un minimo di 100 monete
         {
             _panelVictory?.SetActive(true);
             _panelPerfectVictory?.SetActive(false);
@@ -102,11 +117,6 @@ public class VictoryUI : MonoBehaviour
 
             AudioManager.Instance?.PlayVictory();
         }
-        else
-        {
-            Debug.Log("Non hai abbastanza monete per aprire la porta!");
-            yield break;
-        }
 
         // Blocca player e pausa gioco
         RigidbodyCharacter player = FindObjectOfType<RigidbodyCharacter>();
@@ -118,7 +128,7 @@ public class VictoryUI : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    private IEnumerator FadeInPerfectStar(CanvasGroup canvasGroup)
+    private IEnumerator FadeInPerfectStar(CanvasGroup canvasGroup) // fade in per la stella del perfectvictorypanel
     {
         float elapsed = 0f;
         while (elapsed < _starFadeDuration)
@@ -131,7 +141,7 @@ public class VictoryUI : MonoBehaviour
         AudioManager.Instance?.PlayPerfectVictory();
     }
 
-    public void GoToMainMenu()
+    public void GoToMainMenu() // va al main menu'
     {
         Time.timeScale = 1f;
         Cursor.visible = true;

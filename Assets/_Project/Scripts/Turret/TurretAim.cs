@@ -11,7 +11,7 @@ public class TurretAim : TurretBase
         if (player == null || firePoint == null)
             return;
 
-        // Controlla distanza dal player (più semplice e pulito del CheckSphere)
+        // Controlla distanza dal player
         float distance = Vector3.Distance(transform.position, player.position);
 
         if (distance <= detectionRadius)
@@ -19,7 +19,7 @@ public class TurretAim : TurretBase
             // Ruota verso il player
             RotateTowardsPlayer();
 
-            // Calcola direzione verso il player (leggermente verso l'alto)
+            // Calcola direzione verso il player
             Vector3 dir = (player.position + Vector3.up - firePoint.position).normalized;
 
             // Prova a sparare
@@ -45,7 +45,7 @@ public class TurretAim : TurretBase
         }
     }
 
-    // Mostra il raggio in scena (debug)
+    // Mostra il raggio in scena
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

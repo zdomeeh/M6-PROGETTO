@@ -15,16 +15,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelTimer _levelTimer;
     [SerializeField] private int _requiredCoins = 100;
 
-    private PlatformMoveOnPlayer[] _movingPlatforms;
+    private PlatformMover[] _movingPlatforms;
 
     private void Awake()
     {
         // Trova tutte le piattaforme mobili presenti nella scena
-        _movingPlatforms = FindObjectsOfType<PlatformMoveOnPlayer>();
+        _movingPlatforms = FindObjectsOfType<PlatformMover>();
     }
 
     private void OnEnable()
     {
+        // Collega eventi del timer e della vita del giocatore
         if (_levelTimer != null)
             _levelTimer.OnTimeEnded.AddListener(HandleTimeEnded);
 
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     private void OnDisable()
     {
+        // Rimuove listener quando il GameManager viene disattivato
         if (_levelTimer != null)
             _levelTimer.OnTimeEnded.RemoveListener(HandleTimeEnded);
 
@@ -43,16 +45,17 @@ public class GameManager : MonoBehaviour
 
     private void HandleTimeEnded()
     {
-        _gameOverUI?.Show();
+        _gameOverUI?.Show(); // mostra game over se finisce il tempo
     }
 
     private void HandlePlayerDefeated()
     {
-        _gameOverUI?.Show();
+        _gameOverUI?.Show(); // mostra game over se il giocatore muore
     }
 
     public void FinishLevel()
     {
+        // Mostra vittoria se il player ha raccolto abbastanza monete
         if (_playerCollector != null && _victoryUI != null)
         {
             _victoryUI.ShowVictory(_playerCollector, _requiredCoins);
@@ -61,27 +64,33 @@ public class GameManager : MonoBehaviour
 
     public void RespawnAtCheckpoint()
     {
+        // Controlla se esiste un checkpoint valido
         if (CheckpointManager.Instance == null || !CheckpointManager.Instance.HasCheckpoint())
         {
             Debug.Log("Non sei arrivato in nessun checkpoint");
             return;
         }
 
+        // Recupera posizione e monete salvate al checkpoint
         Vector3 spawnPos = CheckpointManager.Instance.GetCurrentCheckpointPosition();
         int savedCoins = CheckpointManager.Instance.GetCoinsAtCheckpoint();
 
+        // Riposiziona il giocatore
         if (_player != null)
         {
             _player.transform.position = spawnPos;
             _player.enabled = true;
         }
 
+        // Ripristina monete
         if (_playerCollector != null)
             _playerCollector.SetCoins(savedCoins);
 
+        // Ripristina vita del giocatore
         if (_playerLife != null)
             _playerLife.SetHP(_playerLife.GetMaxHP());
 
+        // Resetta timer
         if (_levelTimer != null)
             _levelTimer.ResetTimer(120f);
 
@@ -89,6 +98,6 @@ public class GameManager : MonoBehaviour
         foreach (var platform in _movingPlatforms)
             platform.ResetPlatform();
 
-        _gameOverUI?.Hide();
+        _gameOverUI?.Hide(); // nasconde UI game over se presente
     }
 }

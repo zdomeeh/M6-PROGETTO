@@ -2,57 +2,61 @@ using UnityEngine;
 
 public class PlatformMover : MonoBehaviour
 {
-    [SerializeField] private Transform _pointA;
-    [SerializeField] private Transform _pointB;
+    [SerializeField] private Transform[] _waypoints;
     [SerializeField] private float _speed = 2f;
+    [SerializeField] private bool _loop = true;
+    [SerializeField] private bool _startOnPlayer = false;
 
-    private Vector3 _target;
-    private Vector3 _lastPosition;
+    private int _currentIndex;
+    private bool _active = false;
 
-    private bool _playerOnPlatform = false;
-    private Rigidbody _playerRb;
-
-    void Start()
+    private void Start()
     {
-        _target = _pointB.position;
-        _lastPosition = transform.position;
+        // Posiziona piattaforma al primo waypoint
+        if (_waypoints != null && _waypoints.Length > 0)
+            transform.position = _waypoints[0].position;
+
+        _currentIndex = Mathf.Min(1, _waypoints.Length - 1); // prepara prossimo waypoint
+
+        if (!_startOnPlayer)
+            _active = true; // piattaforma attiva subito se non deve aspettare il player
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        // Muove la piattaforma
-        transform.position = Vector3.MoveTowards(transform.position, _target, _speed * Time.fixedDeltaTime);
+        if (!_active) return; // se non attiva, non muovere
+        if (_waypoints == null || _waypoints.Length < 2) return; // serve almeno 2 waypoint
 
-        // Cambia direzione se raggiunge il target
-        if (Vector3.Distance(transform.position, _target) < 0.1f)
-            _target = (_target == _pointA.position) ? _pointB.position : _pointA.position;
+        Transform target = _waypoints[_currentIndex];
 
-        // Calcola delta posizione
-        Vector3 deltaPos = transform.position - _lastPosition;
+        // Muove piattaforma verso waypoint corrente
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            target.position,
+            _speed * Time.fixedDeltaTime
+        );
 
-        // Muove il player insieme alla piattaforma
-        if (_playerOnPlatform && _playerRb != null)
-            _playerRb.MovePosition(_playerRb.position + deltaPos);
-
-        _lastPosition = transform.position;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.collider.CompareTag("Player"))
+        // Se raggiunge il waypoint, passa al prossimo
+        if (Vector3.Distance(transform.position, target.position) < 0.05f)
         {
-            _playerOnPlatform = true;
-            _playerRb = collision.collider.GetComponent<Rigidbody>();
-            _lastPosition = transform.position; // evita scatti
+            _currentIndex++;
+            if (_currentIndex >= _waypoints.Length)
+                _currentIndex = _loop ? 0 : _waypoints.Length - 1; // loop o fermati
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    public void ActivatePlatform()
     {
-        if (collision.collider.CompareTag("Player"))
+        _active = true; // attiva la piattaforma se era inattiva
+    }
+
+    public void ResetPlatform()
+    {
+        // Riporta piattaforma al primo waypoint
+        if (_waypoints != null && _waypoints.Length > 0)
         {
-            _playerOnPlatform = false;
-            _playerRb = null;
+            transform.position = _waypoints[0].position;
+            _currentIndex = Mathf.Min(1, _waypoints.Length - 1);
         }
     }
 }

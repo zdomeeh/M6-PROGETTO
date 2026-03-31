@@ -14,22 +14,22 @@ public class LevelTimer : MonoBehaviour
     void Start()
     {
         _currentTime = _timeInSeconds;
-        OnTimeChanged.Invoke(_currentTime);
+        OnTimeChanged.Invoke(_currentTime); // aggiorna UI con il tempo iniziale
     }
 
     void Update()
     {
-        if (!_isRunning) return;
+        if (!_isRunning) return; // se il timer non e' attivo, non fare nulla
 
-        _currentTime -= Time.deltaTime;
-        if (_currentTime < 0) _currentTime = 0;
+        _currentTime -= Time.deltaTime; // riduce il tempo ogni frame
+        if (_currentTime < 0) _currentTime = 0; // non va sotto zero
 
-        OnTimeChanged.Invoke(_currentTime);
+        OnTimeChanged.Invoke(_currentTime); // aggiorna UI o eventi con il tempo corrente
 
         if (_currentTime <= 0)
         {
-            _isRunning = false;
-            OnTimeEnded.Invoke();
+            _isRunning = false; // ferma il timer
+            OnTimeEnded.Invoke(); // segnala che il tempo e' finito
         }
     }
 
@@ -37,11 +37,11 @@ public class LevelTimer : MonoBehaviour
     {
         _currentTime += seconds;
         if (_currentTime > _timeInSeconds)
-            _currentTime = _timeInSeconds;
-        OnTimeChanged.Invoke(_currentTime);
+            _currentTime = _timeInSeconds; // non supera il tempo massimo
+        OnTimeChanged.Invoke(_currentTime); // aggiorna UI
     }
 
-    public void StopTimer() => _isRunning = false;
+    public void StopTimer() => _isRunning = false; // ferma il timer
 
     // reset timer per respawn
     public void ResetTimer(float seconds)
@@ -49,6 +49,6 @@ public class LevelTimer : MonoBehaviour
         _timeInSeconds = seconds;
         _currentTime = seconds;
         _isRunning = true;
-        OnTimeChanged.Invoke(_currentTime);
+        OnTimeChanged.Invoke(_currentTime); // aggiorna UI
     }
 }

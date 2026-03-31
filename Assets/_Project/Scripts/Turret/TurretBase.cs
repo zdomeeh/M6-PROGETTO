@@ -9,7 +9,7 @@ public abstract class TurretBase : MonoBehaviour
 
     protected float nextFireTime = 0f;
 
-    // Controlla se può sparare (cooldown) e poi spara
+    // Controlla se puo' sparare e poi spara
     protected void TryFire(Vector3 direction)
     {
         if (Time.time < nextFireTime) return;
@@ -32,14 +32,14 @@ public abstract class TurretBase : MonoBehaviour
             Quaternion.LookRotation(direction)
         );
 
-        // Imposta la velocità del proiettile tramite Rigidbody
+        // Imposta la velocita' del proiettile tramite Rigidbody
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.velocity = direction * projectileSpeed;
         }
 
-        // SUONO sparo
+        // suono sparo
         AudioManager.Instance?.PlayTurretShoot();
     }
 }

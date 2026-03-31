@@ -3,10 +3,10 @@ using UnityEngine;
 public class Checkpoint : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private GameObject _uiText; // es. "Checkpoint attivato!"
+    [SerializeField] private GameObject _uiText;
 
     [Header("Firework")]
-    [SerializeField] private GameObject _fireworkPrefab; // prefab particle system per effetto
+    [SerializeField] private GameObject _fireworkPrefab; // prefab particle system
     [SerializeField] private Transform _fireworkSpawnPoint; // punto da cui far partire il firework
 
     private bool _activated = false;
@@ -35,7 +35,7 @@ public class Checkpoint : MonoBehaviour
             if (_fireworkPrefab != null && _fireworkSpawnPoint != null)
             {
                 Instantiate(_fireworkPrefab, _fireworkSpawnPoint.position, Quaternion.identity);
-                AudioManager.Instance.PlayFirework(); // suono centralizzato
+                AudioManager.Instance.PlayFirework(); // suono
             }
 
             // Suono checkpoint
@@ -45,7 +45,7 @@ public class Checkpoint : MonoBehaviour
 
     private void HideUI()
     {
-        if (_uiText != null)
-            _uiText.SetActive(false);
+        if (_uiText != null) // Se c'e' un oggetto UI assegnato
+            _uiText.SetActive(false); // lo nasconde
     }
 }

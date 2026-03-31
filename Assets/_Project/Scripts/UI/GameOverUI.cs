@@ -14,56 +14,58 @@ public class GameOverUI : MonoBehaviour
 
     private void Start()
     {
+        // Collega il bottone al metodo di respawn
         if (_reloadCheckpointButton != null)
             _reloadCheckpointButton.onClick.AddListener(ReloadCheckpoint);
     }
 
     private void Update()
     {
+        // Attiva il bottone solo se esiste un checkpoint
         if (_reloadCheckpointButton != null)
             _reloadCheckpointButton.interactable = CheckpointManager.Instance?.HasCheckpoint() ?? false;
     }
 
     public void Show()
     {
-        if (_shown) return;
+        if (_shown) return; // evita di mostrare la schermata piu' volte
         _shown = true;
 
-        gameObject.SetActive(true);
+        gameObject.SetActive(true); // mostra UI Game Over
 
-        _levelTimer?.StopTimer();
-        _doorUnlockUI?.HideImmediately();
+        _levelTimer?.StopTimer(); // ferma il timer
+        _doorUnlockUI?.HideImmediately(); // nasconde messaggio porta
 
-        AudioManager.Instance?.PlayGameOver();
-        AudioManager.Instance?.StopMusic();
+        AudioManager.Instance?.PlayGameOver(); // riproduce suono game over
+        AudioManager.Instance?.StopMusic(); // ferma musica
 
         RigidbodyCharacter player = FindObjectOfType<RigidbodyCharacter>();
         if (player != null)
-            player.enabled = false;
+            player.enabled = false; // blocca il player
 
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.None; // mostra il mouse
 
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // mette in pausa il gioco
     }
 
     public void Hide()
     {
         _shown = false;
-        gameObject.SetActive(false);
+        gameObject.SetActive(false); // nasconde UI Game Over
     }
 
     private void ReloadCheckpoint()
     {
-        Time.timeScale = 1f;
+        Time.timeScale = 1f; // riattiva il gioco
 
         GameManager gm = FindObjectOfType<GameManager>();
-        gm?.RespawnAtCheckpoint();
+        gm?.RespawnAtCheckpoint(); // respawn dal checkpoint
 
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Locked; // nasconde il mouse
 
-        AudioManager.Instance?.RestartMusicForScene();
+        AudioManager.Instance?.RestartMusicForScene(); // riavvia la musica
     }
 
     public void RestartLevel()
@@ -73,11 +75,10 @@ public class GameOverUI : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
-        // Resetta checkpoint prima di ricaricare il livello
+        // Cancella il checkpoint prima di ricominciare il livello
         CheckpointManager.Instance?.ResetCheckpoint();
 
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // ricarica il livello
     }
 
     public void GoToMainMenu()
@@ -87,6 +88,6 @@ public class GameOverUI : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("MainMenu"); // torna al menu principale
     }
 }
