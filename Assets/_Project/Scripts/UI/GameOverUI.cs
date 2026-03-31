@@ -78,8 +78,6 @@ public class GameOverUI : MonoBehaviour
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
-        // Riavvia la musica dopo il reload
-        AudioManager.Instance?.RestartMusicForScene();
     }
 
     public void GoToMainMenu()
