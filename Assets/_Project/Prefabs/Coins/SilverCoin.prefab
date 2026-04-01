@@ -5006,7 +5006,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 744c4e6bfe2961b49b3dc46a408ca51d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _value: 3
+  _coinType: 0
+  _coinValue: 3
+  _timeBonus: 10
 --- !u!135 &3409534111831911524
 SphereCollider:
   m_ObjectHideFlags: 0

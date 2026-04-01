@@ -82,6 +82,9 @@ public class GameManager : MonoBehaviour
             _player.enabled = true;
         }
 
+        // Ripristina le monete raccolte dopo il checkpoint
+        CheckpointManager.Instance.RestoreCollectedCoins();
+
         // Ripristina monete
         if (_playerCollector != null)
             _playerCollector.SetCoins(savedCoins);

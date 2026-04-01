@@ -10,9 +10,4 @@ public class CoinUI : MonoBehaviour
         if (_coinText != null) // Controlla che il riferimento non sia nullo
             _coinText.text = "Coins: " + coins;
     }
-
-    public void Test(int value) // Metodo di test per verificare che il valore venga ricevuto correttamente
-    {
-        Debug.Log("UI riceve valore: " + value);
-    }
 }
